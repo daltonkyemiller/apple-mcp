@@ -22,6 +22,7 @@ let package = Package(
             linkerSettings: [
                 .linkedFramework("EventKit"),
                 .linkedFramework("Contacts"),
+                .linkedFramework("Photos"),
                 .linkedFramework("Foundation"),
                 .linkedFramework("AppKit")
             ]

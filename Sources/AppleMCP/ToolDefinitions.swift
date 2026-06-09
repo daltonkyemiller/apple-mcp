@@ -123,6 +123,84 @@ enum ToolDefinitions {
                 ])
             ),
             Tool(
+                name: "photos_list_albums",
+                description: "List user-created albums and non-empty smart albums in the Photos library.",
+                inputSchema: .object([
+                    "type": .string("object"),
+                    "properties": .object([:]),
+                    "additionalProperties": .bool(false)
+                ])
+            ),
+            Tool(
+                name: "photos_search",
+                description: "Search photos and videos by date range, favorites, media type, and/or album. Returns metadata.",
+                inputSchema: .object([
+                    "type": .string("object"),
+                    "properties": .object([
+                        "album_id": .object([
+                            "type": .string("string"),
+                            "description": .string("Optional album localIdentifier (from photos_list_albums) to restrict the query.")
+                        ]),
+                        "after": .object([
+                            "type": .string("string"),
+                            "description": .string("ISO 8601 lower bound on creationDate.")
+                        ]),
+                        "before": .object([
+                            "type": .string("string"),
+                            "description": .string("ISO 8601 upper bound on creationDate.")
+                        ]),
+                        "favorites_only": .object([
+                            "type": .string("boolean"),
+                            "description": .string("Only return assets marked as favorite.")
+                        ]),
+                        "media_type": .object([
+                            "type": .string("string"),
+                            "description": .string("One of: image, video, audio.")
+                        ]),
+                        "limit": .object([
+                            "type": .string("integer"),
+                            "description": .string("Maximum number of assets. Default 50.")
+                        ])
+                    ])
+                ])
+            ),
+            Tool(
+                name: "photos_export",
+                description: "Export the full-resolution asset (original image or video) to a file path on disk.",
+                inputSchema: .object([
+                    "type": .string("object"),
+                    "properties": .object([
+                        "id": .object([
+                            "type": .string("string"),
+                            "description": .string("Photo localIdentifier from photos_search.")
+                        ]),
+                        "path": .object([
+                            "type": .string("string"),
+                            "description": .string("Output file path. Existing files are overwritten. ~ is expanded.")
+                        ])
+                    ]),
+                    "required": .array([.string("id"), .string("path")])
+                ])
+            ),
+            Tool(
+                name: "photos_view",
+                description: "Return a downsized JPEG of an image asset as inline image content. Videos and audio are not supported.",
+                inputSchema: .object([
+                    "type": .string("object"),
+                    "properties": .object([
+                        "id": .object([
+                            "type": .string("string"),
+                            "description": .string("Photo localIdentifier from photos_search.")
+                        ]),
+                        "max_dimension": .object([
+                            "type": .string("integer"),
+                            "description": .string("Maximum width/height in pixels. Default 512.")
+                        ])
+                    ]),
+                    "required": .array([.string("id")])
+                ])
+            ),
+            Tool(
                 name: "messages_list_chats",
                 description: "List recent iMessage/SMS chats from ~/Library/Messages/chat.db. Requires Full Disk Access for the host process.",
                 inputSchema: .object([

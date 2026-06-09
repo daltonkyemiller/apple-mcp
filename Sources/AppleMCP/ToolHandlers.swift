@@ -60,6 +60,41 @@ enum ToolHandlers {
                 )
                 return JSONHelpers.jsonResult(created)
 
+            case "photos_list_albums":
+                let albums = try await PhotosService.listAlbums()
+                return JSONHelpers.jsonResult(albums)
+
+            case "photos_search":
+                let results = try await PhotosService.search(
+                    albumId: JSONHelpers.string(arguments, "album_id"),
+                    after: JSONHelpers.date(arguments, "after"),
+                    before: JSONHelpers.date(arguments, "before"),
+                    favoritesOnly: JSONHelpers.bool(arguments, "favorites_only") ?? false,
+                    mediaType: JSONHelpers.string(arguments, "media_type"),
+                    limit: JSONHelpers.int(arguments, "limit") ?? 50
+                )
+                return JSONHelpers.jsonResult(results)
+
+            case "photos_export":
+                guard let id = JSONHelpers.string(arguments, "id"), !id.isEmpty,
+                      let path = JSONHelpers.string(arguments, "path"), !path.isEmpty else {
+                    return JSONHelpers.errorResult("id and path are required")
+                }
+                let result = try await PhotosService.export(id: id, outputPath: path)
+                return JSONHelpers.jsonResult(result)
+
+            case "photos_view":
+                guard let id = JSONHelpers.string(arguments, "id"), !id.isEmpty else {
+                    return JSONHelpers.errorResult("id is required")
+                }
+                let max = JSONHelpers.int(arguments, "max_dimension") ?? 512
+                let thumb = try await PhotosService.viewThumbnail(id: id, maxDimension: max)
+                let base64 = thumb.data.base64EncodedString()
+                return CallTool.Result(
+                    content: [.image(data: base64, mimeType: thumb.mimeType, annotations: nil, _meta: nil)],
+                    isError: false
+                )
+
             case "messages_list_chats":
                 let limit = JSONHelpers.int(arguments, "limit") ?? 20
                 let chats = try MessagesDB.listChats(limit: limit)

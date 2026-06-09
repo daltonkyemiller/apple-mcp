@@ -1,9 +1,9 @@
 # apple-mcp
 
 A native-Swift [Model Context Protocol](https://modelcontextprotocol.io) server
-that exposes macOS **Calendar**, **Reminders**, **Contacts**, and **Messages**
-to AI agents (Claude Code, Claude Desktop, etc.). No Node, no Python, no shell
-glue — one statically-linked Swift binary.
+that exposes macOS **Calendar**, **Reminders**, **Contacts**, **Photos**, and
+**Messages** to AI agents (Claude Code, Claude Desktop, etc.). No Node, no
+Python, no shell glue — one statically-linked Swift binary.
 
 ## Install
 
@@ -52,6 +52,10 @@ The binary lands at `.build/release/apple-mcp`.
 | `reminders_complete` | Mark a reminder complete |
 | `contacts_search` | Search contacts by name, phone or email; returns phones, emails, addresses, URLs, birthday |
 | `contacts_create` | Create a new contact |
+| `photos_list_albums` | List user-created and non-empty smart albums |
+| `photos_search` | Filter photos by date range, favorites, media type, and/or album |
+| `photos_export` | Save a full-resolution photo or video to disk |
+| `photos_view` | Return a downsized JPEG of an image asset as inline image content |
 | `messages_list_chats` | List recent iMessage/SMS chats |
 | `messages_recent` | Recent messages, optionally per chat |
 | `messages_search` | Substring search over the `text` column |
@@ -107,8 +111,9 @@ macOS will prompt for these the first time each tool group is used:
 1. **Calendar** — *System Settings → Privacy & Security → Calendar*
 2. **Reminders** — *System Settings → Privacy & Security → Reminders*
 3. **Contacts** — *System Settings → Privacy & Security → Contacts*
-4. **Automation → Messages** — granted on first `messages_send`
-5. **Full Disk Access** — must be granted *manually* to the parent process
+4. **Photos** — *System Settings → Privacy & Security → Photos*
+5. **Automation → Messages** — granted on first `messages_send`
+6. **Full Disk Access** — must be granted *manually* to the parent process
    (Terminal, iTerm, Claude Desktop) to read `~/Library/Messages/chat.db`
 
 ## How it works
@@ -117,6 +122,7 @@ macOS will prompt for these the first time each tool group is used:
 | --- | --- |
 | Calendar / Reminders | `EventKit` (`EKEventStore`, `requestFullAccessToEvents` / `requestFullAccessToReminders`) |
 | Contacts | `Contacts` framework (`CNContactStore`) |
+| Photos | `PhotoKit` (`PHPhotoLibrary`, `PHAsset`, `PHImageManager`); thumbnails JPEG-encoded via `NSBitmapImageRep` |
 | Messages reading | Direct `SQLite3` access to `~/Library/Messages/chat.db` |
 | `attributedBody` decoding | Hand-written typedstream scanner — modern Messages stores body text in an `NSArchiver`-format BLOB, not in the `text` column |
 | Messages sending | `NSAppleScript` driving Messages.app (Apple provides no public Swift API for sending iMessages) |
